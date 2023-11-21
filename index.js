@@ -4,6 +4,17 @@ const btnConcluidas = document.getElementById('tasks-concluidas');
 const grupoTasks = document.getElementById('task-grupo');
 const btnPesquisa = document.getElementById('tasks-pesquisa');
 
+// Configuração inicial da página
+document.addEventListener('DOMContentLoaded', () => {
+    // Defina as cores iniciais para o botão "Ativas"
+    btnAtivas.style.backgroundColor = '#141b41';
+    btnAtivas.style.color = '#98b9f2';
+
+    // Atualiza a lista de tarefas com base no estado inicial
+    atualizarListaTarefas();
+});
+
+
 btnPesquisa.addEventListener('click', () => {
     pesquisarPorId()
     btnAtivas.style.backgroundColor='#98b9f2';
@@ -21,21 +32,28 @@ let bancoDados = [];
 let exibirConcluidas = false;
 
 btnAddTask.addEventListener('click', () => {
-    const idTask = {
-        id: contadorID,
-        descricao: obterDescricaoValida(),
-        ativa: true,
-    };
+    const titulo = obterTituloValido();
 
-    if (idTask.descricao) {
-        bancoDados.push(idTask);
+    if (titulo !== null) {
+        const descricao = obterDescricaoValida();
 
-        const article = criarElementoTarefa(idTask);
-        grupoTasks.appendChild(article);
+        if (descricao !== null) {
+            const idTask = {
+                id: contadorID,
+                titulo: titulo,
+                descricao: descricao,
+                ativa: true,
+            };
 
-        contadorID++;
+            bancoDados.push(idTask);
 
-        console.log(bancoDados);
+            const article = criarElementoTarefa(idTask);
+            grupoTasks.appendChild(article);
+
+            contadorID++;
+
+            console.log(bancoDados);
+        }
     }
 });
 
@@ -60,30 +78,67 @@ btnConcluidas.addEventListener('click', () => {
     btnAtivas.style.color='#141b41';
     atualizarListaTarefas();
 });
+
+function obterTituloValido(obrigatorio = true) {
+    let tituloValido = false;
+    let titulo = '';
+
+    while (!tituloValido) {
+        try {
+            titulo = prompt("Criador de tasks ativado. Por favor insira um título para sua nova tarefa:");
+
+            if (titulo === null) {
+                // O usuário clicou em Cancelar, então sai do loop
+                throw new Error('Operação cancelada pelo usuário.');
+            }
+
+            if (obrigatorio && (titulo.trim() === '' || titulo.length < 4 || !isNaN(Number(titulo)))) {
+                throw new Error('O título não pode ser vazio, conter apenas números ou ter menos de 4 caracteres.');
+            }
+
+            tituloValido = true;
+        } catch (error) {
+            // Se o usuário clicou em Cancelar, sai do loop lançando o erro novamente
+            if (error.message === 'Operação cancelada pelo usuário.') {
+                throw error;
+            } else {
+                // Se ocorreu outro tipo de erro, mostra um alerta e continua no loop
+                alert(error.message);
+            }
+        }
+    }   
+
+    return titulo.trim();  // Retorna o título sem espaços extras
+}
+
+
+
 function obterDescricaoValida() {
     let descricaoValida = false;
     let descricao = '';
 
     while (!descricaoValida) {
         try {
-            descricao = prompt("Criador de tasks ativado. Por favor, insira uma descrição para sua nova tarefa:");
+            descricao = prompt("Agora uma descrição para sua nova tarefa:");
 
             if (descricao === null) {
                 // O usuário clicou em Cancelar, então sai do loop
                 throw new Error('Operação cancelada pelo usuário.');
             }
 
-            if (descricao.trim() === '' || descricao.length < 4 || !isNaN(Number(descricao))) {
-                throw new Error('A descrição não pode ser vazia, conter apenas números ou ter menos de 4 caracteres.');
+            if (descricao.trim() === '' || descricao.length < 20 || !isNaN(Number(descricao))) {
+                throw new Error('A descrição não pode ser vazia ou ter menos de 20 caracteres.');
             }
 
             descricaoValida = true;
         } catch (error) {
-            // Se o usuário clicou em Cancelar, sai do loop sem lançar o erro novamente
-            if (error.message !== 'Operação cancelada pelo usuário.') {
+            // Se o usuário clicou em Cancelar, lança o erro novamente
+            if (error.message === 'Operação cancelada pelo usuário.') {
                 alert(error.message);
+                throw error;
             } else {
-                break;
+                // Se ocorreu outro tipo de erro, mostra um alerta e continua no loop
+                alert(error.message);
             }
         }
     }
@@ -100,7 +155,7 @@ function criarElementoTarefa(tarefa) {
 
     const idSection = document.createElement('section');
     idSection.classList.add('task-id');
-    idSection.textContent = tarefa.id;
+    idSection.textContent = tarefa.id + ' ' + tarefa.titulo;
 
     const buttonsSection = document.createElement('section');
     buttonsSection.classList.add('task-buttons');
@@ -161,12 +216,24 @@ function editarTarefa(id) {
     const tarefa = bancoDados.find(t => t.id === id);
 
     if (tarefa) {
+        const novoTitulo = obterTituloValido(false);  // Passando false para indicar que o título não é obrigatório
         const novaDescricao = obterDescricaoValida();
 
-        if (novaDescricao) {
-            tarefa.descricao = novaDescricao;
-            atualizarListaTarefas();
+        if (novoTitulo === null && novaDescricao === null) {
+            alert('Operação cancelada.');
+            return;
         }
+
+        if (novoTitulo !== null) {
+            tarefa.titulo = novoTitulo;
+        }
+
+        if (novaDescricao !== null) {
+            tarefa.descricao = novaDescricao;
+        }
+
+        // Se a operação não foi cancelada, atualiza a lista
+        atualizarListaTarefas();
     }
 }
 
