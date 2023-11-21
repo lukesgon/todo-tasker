@@ -57,6 +57,7 @@ btnAddTask.addEventListener('click', () => {
     }
 });
 
+//Evento ao clicar no botão que desmontra as tasks ativas no momento.
 btnAtivas.addEventListener('click', () => {
     exibirConcluidas = false;
     btnPesquisa.style.backgroundColor='#98b9f2';
@@ -68,6 +69,7 @@ btnAtivas.addEventListener('click', () => {
     atualizarListaTarefas();
 });
 
+//Evento ao clicar no botão que desmontra as tasks concluidas no momento.
 btnConcluidas.addEventListener('click', () => {
     exibirConcluidas = true;
     btnConcluidas.style.backgroundColor='#141b41';
@@ -79,6 +81,8 @@ btnConcluidas.addEventListener('click', () => {
     atualizarListaTarefas();
 });
 
+
+//Função que garante a captura de um titulo adequado no prompt do usuário.
 function obterTituloValido(obrigatorio = true) {
     let tituloValido = false;
     let titulo = '';
@@ -112,6 +116,7 @@ function obterTituloValido(obrigatorio = true) {
 }
 
 
+//Função que garante a captura de uma descrição adequada no prompt do usuário.
 
 function obterDescricaoValida() {
     let descricaoValida = false;
@@ -146,6 +151,8 @@ function obterDescricaoValida() {
     return descricao;
 }
 
+
+//Função que cria os elementos componentes do article de cada tarefa no DOM.
 function criarElementoTarefa(tarefa) {
     const article = document.createElement('article');
     article.classList.add('task-corpo');
